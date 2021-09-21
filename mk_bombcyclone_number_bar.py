@@ -54,22 +54,22 @@ def sum_this_winter_data(df):
         this_year_data = df[(df['year'] == year + 1) & (df['month'] <= 3)]
         this_winter_data = pd.concat([previous_year_data, this_year_data]).sum(axis=0)
         same_winter_data[df_columns[i]] = [this_winter_data['number'], this_winter_data['oj_strong'], this_winter_data['oj_ordinary'], this_winter_data['oj_strong'] + this_winter_data['oj_ordinary']]
-    return same_winter_data
+    return same_winter_data.T # transpose
 
 
 def mk_bar(df):
     fig = plt.figure(figsize=(15, 6))
     ax = fig.add_subplot(111)
 
-    columns_num_array = np.array(range(len(df.columns)))
+    index_num_array = np.array(range(len(df.index)))
     width = 0.1
 
-    for index in df.index:
-        ax.bar(columns_num_array, df.loc[index], width=width, label=index)
-        columns_num_array = columns_num_array + width #avoid overlap bar.
+    for column in df.columns:
+        ax.bar(index_num_array, df[column], width=width, label=column)
+        index_num_array = index_num_array + width #avoid overlap bar.
 
-    ax.set_xticks(np.array(range(len(df.columns) + 2)))
-    ax.set_xticklabels(df.columns)
+    ax.set_xticks(np.array(range(len(df.index) + 2)))
+    ax.set_xticklabels(df.index)
     ax.set_ylabel("The number of bomb cycloen")
     ax.legend()
     fig.savefig('test')
@@ -81,7 +81,7 @@ def main():
     df = read_csv(args["file"])
 
     same_winter_data = sum_this_winter_data(df)
-    print(same_winter_data.describe())
+    print(same_winter_data.describe().round(1))
 
     mk_bar(same_winter_data)
 
