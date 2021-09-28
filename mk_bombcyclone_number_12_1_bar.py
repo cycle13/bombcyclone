@@ -47,11 +47,11 @@ def sum_this_winter_data(df):
         columns=df_columns)  # empty DataFrame
 
     for i, year in enumerate(year_list):
-        if year == 2020:
+        if year == 2021:
             break
 
-        previous_year_data = df[(df['year'] == year) & (df['month'] >= 11)]
-        this_year_data = df[(df['year'] == year + 1) & (df['month'] <= 3)]
+        previous_year_data = df[(df['year'] == year) & (df['month'] == 12)]
+        this_year_data = df[(df['year'] == year + 1) & (df['month'] == 1)]
         this_winter_data = pd.concat([previous_year_data, this_year_data]).sum(axis=0)
         same_winter_data[df_columns[i]] = [this_winter_data['number'], this_winter_data['oj_strong'], this_winter_data['oj_ordinary'], this_winter_data['oj_strong'] + this_winter_data['oj_ordinary']]
     return same_winter_data.T # transpose
