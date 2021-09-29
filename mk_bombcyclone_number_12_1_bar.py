@@ -96,7 +96,7 @@ def mk_bar(df):
         index_num_array = index_num_array + width #avoid overlap bar.
 
     ax.set_xticks(np.array(range(len(df.index) + 2)))
-    ax.set_xticklabels(df.index)
+    ax.set_xticklabels(df.index, fontsize=20)
     ax.set_ylabel("The number of bomb cyclone", fontsize=30)
     plt.yticks(fontsize=30)
     ax.legend(fontsize=30)
