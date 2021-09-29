@@ -98,6 +98,7 @@ def mk_bar(df):
     ax.set_xticks(np.array(range(len(df.index) + 2)))
     ax.set_xticklabels(df.index)
     ax.set_ylabel("The number of bomb cyclone", fontsize=30)
+    plt.yticks(fontsize=30)
     ax.legend(fontsize=30)
     fig.savefig('test')
 
