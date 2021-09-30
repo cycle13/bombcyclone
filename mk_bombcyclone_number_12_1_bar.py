@@ -69,7 +69,7 @@ def add_label(graph, oj_ratio):
         plt.rcParams["font.size"] = 40
         if oj_ratio[i] == 0:
             continue
-        plt.annotate('{:.1f}'.format(oj_ratio[i]),
+        plt.annotate('{:.1f}%'.format(oj_ratio[i]),
                     xy=(rect.get_x() + rect.get_width() / 2, height), # label location settings(x, y)
                     xytext=(0, 3), # distance of bar
                     textcoords="offset points",
