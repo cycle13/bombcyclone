@@ -1,0 +1,9 @@
+1,cyclonegenesis date,2018-12-24T03:00:00+09:00
+2,lifetime (hour),12
+3,max. developing rate,1.65,40.0,152.5
+4,minimum SLP,983.5,41.2,157.5
+100,No. of timestep (or No. of lines),3
+100,timestep,date,time,lat,lon,SLP,develop_rate
+110,1,2018-12-24,03:00:00,38.8,147.5,1001.5,-999
+110,2,2018-12-24,09:00:00,40.0,152.5,992.6,1.65
+110,3,2018-12-24,15:00:00,41.2,157.5,983.5,-999
