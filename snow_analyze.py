@@ -12,6 +12,7 @@ Date: 2021/10/20
 import os
 from os.path import abspath, join
 import pandas as pd
+import numpy as np
 import mymatlib
 
 
@@ -63,30 +64,61 @@ def cut_snow_data(df: pd.DataFrame, city: str, city_ins):
     )
 
 
+def ave_all_city(city_data: dict):
+    cnt = 0
+    all_city_data = 0
+    for city, city_ins in city_data.items():
+        if cnt == 0:
+            all_city_data = city_ins.all_data.values
+        else:
+            all_city_data += city_ins.all_data.values
+        cnt += 1
+    ave_city_data = all_city_data.T / len(city_data)
+    return ave_city_data
+
+
 class CityData:
 
 
     def __init__(self, city: str):
         self.city = city
-        self.sum_snow_this_year = pd.DataFrame()
-        self.sum_snow_10ave = pd.DataFrame()
-        self.sum_snow_ordinary = pd.DataFrame()
+        self.snow_this_year = pd.DataFrame()
+        self.snow_10ave = pd.DataFrame()
+        self.snow_ordinary = pd.DataFrame()
+        self.snow_ratio = pd.DataFrame()
+        self.all_data = pd.DataFrame()
 
-    def add_data(self, snow_this_year, snow_10ave, snow_ordinary):
-        if self.sum_snow_this_year.empty:
-            self.sum_snow_this_year = snow_this_year
-            self.sum_snow_10ave = snow_10ave
-            self.sum_snow_ordinary = snow_ordinary
+    def add_data(self, snow_this_year: pd.DataFrame, snow_10ave: pd.DataFrame, snow_ordinary: pd.DataFrame):
+        if self.snow_this_year.empty:
+            self.snow_this_year = snow_this_year
+            self.snow_10ave = snow_10ave
+            self.snow_ordinary = snow_ordinary
+            self.snow_ratio = snow_ordinary
+
         else:
-            self.sum_snow_this_year = pd.concat([self.sum_snow_this_year, snow_this_year], sort=True)
-            self.sum_snow_10ave = pd.concat([self.sum_snow_10ave, snow_10ave], sort=True)
-            self.sum_snow_ordinary = pd.concat([self.sum_snow_ordinary, snow_ordinary], sort=True)
+            self.snow_this_year = pd.concat([self.snow_this_year, snow_this_year], sort=True)
+            self.snow_10ave = pd.concat([self.snow_10ave, snow_10ave], sort=True)
+            self.snow_ordinary = pd.concat([self.snow_ordinary, snow_ordinary], sort=True)
 
-    def save_data(self):
+            ordinary_monthly_mean = float(snow_ordinary.mean())
+            if ordinary_monthly_mean == 0:
+                snow_ratio = snow_ordinary.copy()
+                self.snow_ratio = pd.concat([self.snow_ratio, snow_ratio])
+            else:
+                snow_ratio = pd.DataFrame((snow_this_year.values / ordinary_monthly_mean), columns=[(self.city + "最深積雪(cm)平年値(cm)")], index=snow_ordinary.index)
+                self.snow_ratio = pd.concat([self.snow_ratio, snow_ratio])
 
-        tmp_data = pd.concat([self.sum_snow_this_year, self.sum_snow_10ave], axis=1, sort=True)
-        all_data = pd.concat([tmp_data, self.sum_snow_ordinary], axis=1, sort=True)
-        all_data.to_csv("tmp.csv" )
+    def concat_data(self):
+        self.snow_ratio = self.snow_ratio.rename(columns={(self.city + "最深積雪(cm)平年値(cm)"): (self.city + "最深積雪/平年値平均(cm)")})
+        self.all_data = pd.concat(
+            [
+            self.snow_this_year,
+            self.snow_10ave,
+            self.snow_ordinary,
+            self.snow_ratio,
+            ], axis=1, sort=True
+        )
+        self.all_data.to_csv("tmp.csv")
 
 
 def main():
@@ -107,8 +139,17 @@ def main():
             cut_snow_data(df, city, city_data[city])
 
     for city in citys:
-        city_data[city].save_data()
+        city_data[city].concat_data()
 
+    ave_city_data_all = ave_all_city(city_data)
+    plt_set = mymatlib.PltSet()
+    x = city_data["氷見"].snow_this_year.index
+
+    plt_set.plot(x, ave_city_data_all[0], "date", "snowfall thisyear (cm)", xisDate=True)
+    plt_set.plot(x, ave_city_data_all[1], "date", "snowfall 10year ave (cm)", xisDate=True)
+    plt_set.plot(x, ave_city_data_all[2], "date", "snowfall heinen (cm)", xisDate=True)
+    plt_set.plot(x, ave_city_data_all[3], "date", "snowfall thisyear/snowfall heinen", xisDate=True, newYaxis=True)
+    plt_set.save_fig("snow")
 
 if __name__ == "__main__":
     main()

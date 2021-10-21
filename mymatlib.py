@@ -1,13 +1,13 @@
-#########################################################################
-# Name: mymatlib.py
-#
-# matplotlib my favorite plot settings.
-#
-# Usage: This is the module.
-#
-# Author: Ryosuke Tomita
-# Date: 2021/08/25
-#########################################################################
+"""
+Name: mymatlib.py
+
+matplotlib my favorite plot settings.
+
+Usage: This is the module.
+
+Author: Ryosuke Tomita
+Date: 2021/08/25
+"""
 import sys
 from os.path import dirname
 import matplotlib.pyplot as plt
@@ -18,11 +18,11 @@ from fontjp import fontjp
 
 class PltSet:
     def __init__(self):
-        self.fig = plt.figure(figsize=(9, 6))
+        self.fig = plt.figure(figsize=(15, 6))
         self.ax = self.fig.add_subplot(111)
         self.plt = plt
         self.linestyle = ["solid", "dashed", "dashdot", "dotted"]
-        self.plotcolor = ["b", "g", "o", "r"]
+        self.plotcolor = ["b", "g", "r", "m"]
         self.cnt = 0
         self.legend_bar = []
         self.legend_label = []
@@ -30,7 +30,7 @@ class PltSet:
         self.plt.rcParams['font.family'] = 'Times New Roman'
         self.plt.rcParams['mathtext.fontset'] = 'stix'
         self.plt.rcParams["font.size"] = 15
-        self.plt.rcParams['xtick.labelsize'] = 24
+        self.plt.rcParams['xtick.labelsize'] = 35
         self.plt.rcParams['ytick.labelsize'] = 24
         plt.rcParams['xtick.direction'] = 'in'  # x軸の向きを内側に設定
         self.plt.rcParams['ytick.direction'] = 'in'
@@ -63,7 +63,7 @@ class PltSet:
                           color=self.plotcolor[self.cnt],
                           linestyle=self.linestyle[self.cnt],)
             self.ax2.set_xlabel(xlabel, fontsize=10,)
-            self.ax2.set_ylabel(ylabel, fontsize=10,)
+            self.ax2.set_ylabel(ylabel, fontsize=15,)
 
             bar, label = self.ax2.get_legend_handles_labels()
 
@@ -77,7 +77,8 @@ class PltSet:
                          color=self.plotcolor[self.cnt],
                          linestyle=self.linestyle[self.cnt],)
             self.ax.set_xlabel(xlabel, fontsize=10,)
-            self.ax.set_ylabel(ylabel, fontsize=10,)
+            self.ax.set_ylabel(ylabel, fontsize=15,)
+            self.plt.yticks(fontsize=18)
 
             bar, label = self.ax.get_legend_handles_labels()
         # grid setting
@@ -91,6 +92,6 @@ class PltSet:
         self.cnt += 1
 
     def save_fig(self, fig_name):
-        self.ax.legend(self.legend_bar, self.legend_label,
-                       loc='upper left', borderaxespad=0, bbox_to_anchor=(1.05, 1))
+        #self.ax.legend(self.legend_bar, self.legend_label,
+        #               loc='upper left', borderaxespad=0, bbox_to_anchor=(1.05, 1))
         self.fig.savefig(fig_name, bbox_inches="tight", pad_inches=0.5)
