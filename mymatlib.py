@@ -92,6 +92,8 @@ class PltSet:
         self.cnt += 1
 
     def save_fig(self, fig_name):
+        self.legend_bar = list(dict.fromkeys(self.legend_bar))
+        self.legend_label = list(dict.fromkeys(self.legend_label))
         self.ax.legend(self.legend_bar, self.legend_label,
                        loc='upper left', borderaxespad=0, bbox_to_anchor=(1.05, 1))
         self.fig.savefig(fig_name, bbox_inches="tight", pad_inches=0.5)
