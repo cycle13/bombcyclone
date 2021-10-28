@@ -146,10 +146,11 @@ def main():
     x = city_data["氷見"].snow_this_year.index
 
     plt_set.plot(x, ave_city_data_all[0], "date", "snowfall thisyear (cm)", xisDate=True)
-    plt_set.plot(x, ave_city_data_all[1], "date", "snowfall 10year ave (cm)", xisDate=True)
+    #plt_set.plot(x, ave_city_data_all[1], "date", "snowfall 10year ave (cm)", xisDate=True)
     plt_set.plot(x, ave_city_data_all[2], "date", "snowfall heinen (cm)", xisDate=True)
-    plt_set.plot(x, ave_city_data_all[3], "date", "snowfall thisyear/snowfall heinen", xisDate=True, newYaxis=True)
+    #plt_set.plot(x, ave_city_data_all[3], "date", "snowfall thisyear/snowfall heinen", xisDate=True, newYaxis=True)
     plt_set.save_fig("snow")
+    print(len(ave_city_data_all[0]))
 
 if __name__ == "__main__":
     main()
