@@ -79,7 +79,6 @@ def ave_all_city(city_data: dict):
 
 class CityData:
 
-
     def __init__(self, city: str):
         self.city = city
         self.snow_this_year = pd.DataFrame()
@@ -150,7 +149,8 @@ def main():
     plt_set.plot(x, ave_city_data_all[2], "date", "snowfall heinen (cm)", xisDate=True)
     #plt_set.plot(x, ave_city_data_all[3], "date", "snowfall thisyear/snowfall heinen", xisDate=True, newYaxis=True)
     plt_set.save_fig("snow")
-    print(len(ave_city_data_all[0]))
+    print(ave_city_data_all[2].mean())
+    print(ave_city_data_all[2].std())
 
 if __name__ == "__main__":
     main()
