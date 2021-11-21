@@ -9,20 +9,22 @@ Usage:python3 snow_analyze.py
 Author: Ryosuke Tomita
 Date: 2021/10/20
 """
+from typing import Tuple
 import os
 from os.path import abspath, join
 import pandas as pd
-import numpy as np
-import mymatlib
 
 
-def mk_file_list(dir_: str) -> list:
+def mk_file_list(dir_: str) -> Tuple[list, list]:
+    prefecture_list = [
+            file_.replace(".csv", "")
+            for file_ in os.listdir(dir_)
+    ]
     file_list = [
             join(dir_, file_)
-            for file_ in sorted(os.listdir(dir_))
-            if ".csv" in file_
+            for file_ in os.listdir(dir_)
     ]
-    return file_list
+    return prefecture_list, file_list
 
 
 def get_csv_header(file_: str) -> list:
@@ -34,11 +36,25 @@ def get_csv_header(file_: str) -> list:
         encoding='s-jis'
     ).astype(str)
     header = [
-        (header_parts[i][0] + header_parts[i][1] + header_parts[i][2]
+        (header_parts[i][0] + header_parts[i][1].replace("(cm)", "") + header_parts[i][2].replace("(cm)", "")
         + header_parts[i][3]).replace("nan", "")
         for i in range(len(header_parts.columns))
     ]
     return header
+
+
+def get_city_name(file_: str) -> list:
+    city_df = pd.read_csv(
+            file_,
+            skiprows=2,
+            header=None,
+            nrows=1,
+            encoding='s-jis'
+            ).astype(str)
+    city_list = list(set(city_df.loc[0]))
+    city_list.remove("nan")
+    return city_list
+
 
 def read_csv(file_: str, header: list) -> pd.DataFrame:
 
@@ -47,110 +63,39 @@ def read_csv(file_: str, header: list) -> pd.DataFrame:
         names=tuple(header),
         index_col=0,
         encoding='s-jis')
-#    print(data.filter(like="氷", axis=1))
     return data
 
 
-def cut_snow_data(df: pd.DataFrame, city: str, city_ins):
-    city_snow_data = df.filter(like=city, axis=1).filter(like="最深積雪", axis=1)
-    city_snow_this_year = city_snow_data.filter(items=[(city+"最深積雪(cm)")])
-    city_snow_10ave = city_snow_data.filter(items=[(city+"最深積雪(cm)過去10年平均(cm)")])
-    city_snow_ordinary = city_snow_data.filter(items=[(city+"最深積雪(cm)平年値(cm)")])
-
-    city_ins.add_data(
-        city_snow_this_year,
-        city_snow_10ave,
-        city_snow_ordinary,
-    )
+def ave_prefecture(df: pd.DataFrame, index: str,city_list: list) -> pd.DataFrame:
+    df[("all_city"+index)] = 0
+    for city in city_list:
+        df[("all_city"+index)] += df[(city+"降雪量合計")]
+    df[("all_city"+index)] = df[("all_city"+index)] / len(city_list)
+    return df
 
 
-def ave_all_city(city_data: dict):
-    cnt = 0
-    all_city_data = 0
-    for city, city_ins in city_data.items():
-        if cnt == 0:
-            all_city_data = city_ins.all_data.values
-        else:
-            all_city_data += city_ins.all_data.values
-        cnt += 1
-    ave_city_data = all_city_data.T / len(city_data)
-    return ave_city_data
-
-
-class CityData:
-
-    def __init__(self, city: str):
-        self.city = city
-        self.snow_this_year = pd.DataFrame()
-        self.snow_10ave = pd.DataFrame()
-        self.snow_ordinary = pd.DataFrame()
-        self.snow_ratio = pd.DataFrame()
-        self.all_data = pd.DataFrame()
-
-    def add_data(self, snow_this_year: pd.DataFrame, snow_10ave: pd.DataFrame, snow_ordinary: pd.DataFrame):
-        if self.snow_this_year.empty:
-            self.snow_this_year = snow_this_year
-            self.snow_10ave = snow_10ave
-            self.snow_ordinary = snow_ordinary
-            self.snow_ratio = snow_ordinary
-
-        else:
-            self.snow_this_year = pd.concat([self.snow_this_year, snow_this_year], sort=True)
-            self.snow_10ave = pd.concat([self.snow_10ave, snow_10ave], sort=True)
-            self.snow_ordinary = pd.concat([self.snow_ordinary, snow_ordinary], sort=True)
-
-            ordinary_monthly_mean = float(snow_ordinary.mean())
-            if ordinary_monthly_mean == 0:
-                snow_ratio = snow_ordinary.copy()
-                self.snow_ratio = pd.concat([self.snow_ratio, snow_ratio])
-            else:
-                snow_ratio = pd.DataFrame((snow_this_year.values / ordinary_monthly_mean), columns=[(self.city + "最深積雪(cm)平年値(cm)")], index=snow_ordinary.index)
-                self.snow_ratio = pd.concat([self.snow_ratio, snow_ratio])
-
-    def concat_data(self):
-        self.snow_ratio = self.snow_ratio.rename(columns={(self.city + "最深積雪(cm)平年値(cm)"): (self.city + "最深積雪/平年値平均(cm)")})
-        self.all_data = pd.concat(
-            [
-            self.snow_this_year,
-            self.snow_10ave,
-            self.snow_ordinary,
-            self.snow_ratio,
-            ], axis=1, sort=True
-        )
-        self.all_data.to_csv("tmp.csv")
+def ave_hokuriku(df: pd.DataFrame)
 
 
 def main():
-    dir_ = abspath("./snowdata")
-    file_list = mk_file_list(dir_)
+    prefecture_list, file_list = mk_file_list(abspath("snow_data"))
 
-    citys = ["氷見", "伏木", "朝日", "魚津", "富山" ]
-    city_data = {
-            city: CityData(city)
-            for city in citys
-        }
+    for i, file_ in enumerate(file_list):
+        header = get_csv_header(file_)
+        city_list = get_city_name(file_)
+        df = read_csv(file_, header)
 
-    header = get_csv_header(file_list[0])
+        df = ave_prefecture(df, "降雪量合計", city_list)
+        df = ave_prefecture(df, "降雪量合計平年値", city_list)
+        prefecture_list[i]
 
-    for file_ in file_list:
-        df= read_csv(file_, header)
-        for city in citys:
-            cut_snow_data(df, city, city_data[city])
+    #df.to_csv("tmp.csv", encoding="s-jis")
 
-    for city in citys:
-        city_data[city].concat_data()
+    #city_data = {
+    #        city: CityData(city)
+    #        for city in city_list
+    #    }
 
-    ave_city_data_all = ave_all_city(city_data)
-    plt_set = mymatlib.PltSet()
-    x = city_data["氷見"].snow_this_year.index
-
-    plt_set.plot(x, ave_city_data_all[0], "date", "snowfall thisyear (cm)", xisDate=True)
-    #plt_set.plot(x, ave_city_data_all[1], "date", "snowfall 10year ave (cm)", xisDate=True)
-    plt_set.plot(x, ave_city_data_all[2], "date", "snowfall heinen (cm)", xisDate=True)
-    #plt_set.plot(x, ave_city_data_all[3], "date", "snowfall thisyear/snowfall heinen", xisDate=True, newYaxis=True)
-    plt_set.save_fig("snow")
-    print(ave_city_data_all[2].mean())
-    print(ave_city_data_all[2].std())
 
 if __name__ == "__main__":
     main()

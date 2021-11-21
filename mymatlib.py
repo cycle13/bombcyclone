@@ -91,6 +91,10 @@ class PltSet:
         self.legend_label += label
         self.cnt += 1
 
+    def ave_line(self, x, y):
+        #self.ax.plot([x.min(), y.mean()], [x.max(), y.mean()], color="green")
+        self.ax.hlines(y.mean(), x[0], x[-1], color="green")
+
     def save_fig(self, fig_name):
         self.legend_bar = list(dict.fromkeys(self.legend_bar))
         self.legend_label = list(dict.fromkeys(self.legend_label))
