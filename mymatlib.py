@@ -29,7 +29,7 @@ class PltSet:
 
         self.plt.rcParams['font.family'] = 'Times New Roman'
         self.plt.rcParams['mathtext.fontset'] = 'stix'
-        self.plt.rcParams["font.size"] = 15
+        self.plt.rcParams["font.size"] = 24
         self.plt.rcParams['xtick.labelsize'] = 35
         self.plt.rcParams['ytick.labelsize'] = 24
         plt.rcParams['xtick.direction'] = 'in'  # x軸の向きを内側に設定
@@ -47,10 +47,10 @@ class PltSet:
 
     def plot(self, x, y, xlabel, ylabel, xisDate=False, newYaxis=False):
         if xisDate:
-            new_xticks = list(range(len(x)))
-            self.ax.xaxis.set_major_locator(ticker.FixedLocator(new_xticks))
-            self.ax.xaxis.set_ticklabels(x)
-            self.plt.xticks(rotation=90)
+            new_xticks = list(range(0, len(x), 10))
+            self.ax.xaxis.set_major_locator(ticker.FixedLocator(new_xticks)) # x軸をnew_xticksで置き換える
+            self.ax.xaxis.set_ticklabels(x[::10], fontsize=20) # new_xticksの表示を置き換え
+            self.plt.xticks(rotation=60)
 
         if newYaxis and self.cnt > 0:
             self.ax2 = self.ax.twinx()
@@ -91,9 +91,9 @@ class PltSet:
         self.legend_label += label
         self.cnt += 1
 
-    def ave_line(self, x, y):
+    def ave_line(self, x, y, color: str):
         #self.ax.plot([x.min(), y.mean()], [x.max(), y.mean()], color="green")
-        self.ax.hlines(y.mean(), x[0], x[-1], color="green")
+        self.ax.hlines(y.mean(), x[0], x[-1], color=color)
 
     def save_fig(self, fig_name):
         self.legend_bar = list(dict.fromkeys(self.legend_bar))
